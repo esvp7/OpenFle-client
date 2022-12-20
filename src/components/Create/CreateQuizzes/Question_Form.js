@@ -23,11 +23,15 @@ import { Accordion,
   AccordionDetails, 
   FormControlLabel, 
   Typography,
-  Select, } from '@material-ui/core';
+  Select,
+  MenuItem,
+  IconButton } from '@material-ui/core';
 import { CropOriginal, 
   Subject,
-  Checkbox,
-  Radio, } from "@material-ui/icons";
+  Radio, 
+  CheckBox,
+  ShortText,
+  Close } from "@material-ui/icons";
 
 const Question_Form = () => {
   const [questions, setQuestions] = useState(
@@ -89,10 +93,26 @@ const questionsUI = () => {
               <CropOriginal style={{'color': '#5F6368'}} />
                 <Select className="select" stlye={{'color': '#5F6368', 'fontSize': '13px'}}>
                   <MenuItem id="text" value="Text"><Subject style={{'marginRight': '10px'}}/> Paragraph</MenuItem>
-                  <MenuItem id="checkbox" value="Checkbox"><Checkbox style={{'marginRight': '10px', 'color': '#70757a'}}/> Checkbox</MenuItem>
+                  <MenuItem id="checkbox" value="Checkbox"><CheckBox style={{'marginRight': '10px', 'color': '#70757a'}}/> Checkbox</MenuItem>
                   <MenuItem id="radio" value="Radio"><Radio style={{'marginRight': '10px', 'color': '#70757a'}} checked/> Multiple Choice</MenuItem>
                 </Select>
             </div>
+            {ques.options.map((op, j) => (
+              <div className="add_question_body" key={j}>
+                {
+                  (ques.questionType="text") ? 
+                    <input type={ques.questionType} style={{'marginRight': '10px'}}/> :
+                    <ShortText style={{'marginRight': '10px'}}/>
+                }
+                <div>
+                  <input type="text" className="text_input" placeholder="option" value={ques.options[j].ooptionText}/>
+                </div>
+                <CropOriginal style={{'color': '#5f6368'}} />
+                <IconButton aria-label="delete">
+                    <Close />
+                </IconButton>
+              </div>
+            ))}
           </AccordionDetails>
         </div>
       </Accordion>
