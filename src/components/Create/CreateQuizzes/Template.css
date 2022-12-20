@@ -1,0 +1,44 @@
+.template_section {
+    background-color: #f4f4f9;
+    padding-bottom: 40px;
+    padding-top: 7px;
+}
+.template_top {
+    margin-left: 100px;
+    margin-right: 180px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+.template_body {
+    margin-left: 160px;
+    margin-right: 160px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+.template_card {
+    margin-left: 20px;
+    margin-top: 15px;
+}
+.card_image {
+    box-sizing: border-box;
+    height: 120px;
+    width: 140px;
+    object-fit: cover;
+    cursor: pointer;
+    border-radius: 2px;
+    border: 0.2px solid #FFFDF7;
+}
+.card_image:hover {
+    border: 1px solid #3bb19b;
+}
+.card_title {
+    font-size: 14px;
+    margin-top: 2px;
+    color: #202124;
+    font-weight: 500;
+}
