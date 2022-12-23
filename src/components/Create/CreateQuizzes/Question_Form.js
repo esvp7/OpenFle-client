@@ -38,9 +38,12 @@ import { CropOriginal,
   MoreVert,
   AddCircleOutline,
   OndemandVideo,
-  TextFields} from "@material-ui/icons";
+  TextFields,
+  DragIndicator
+  } from "@material-ui/icons";
 import { FcRightUp } from "react-icons/fc";
 import { BsTrash } from "react-icons/bs";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const Question_Form = () => {
   const [questions, setQuestions] = useState(
@@ -54,20 +57,18 @@ options: [
 ],
 open: true,
 required: false}]
-)
+);
 
 function changeQuestion(text, i) {
   var newQuestion = [...questions];
   newQuestion[i].questionText = text;
   setQuestions(newQuestion);
-  console.log(newQuestion);
 }
 
 function changeOptionValue(text, i, j) {
   var optionsQuestion = [...questions];
   optionsQuestion[i].options[j].optionText = text;
   setQuestions(optionsQuestion);
-  console.log(optionsQuestion);
 }
 
 function addQuestionType(i, type) {
@@ -80,16 +81,109 @@ function addQuestionType(i, type) {
 function removeOption(i, j) {
   var RemoveOptionQuestion = [...questions];
   if (RemoveOptionQuestion[i].options.length > 1) {
-    RemoveOptionQuestion[i].options.splice(j, i);
-  setQuestions(RemoveOptionQuestion);
-  console.log(i + "__" + j)
+    RemoveOptionQuestion[i].options.splice(j, 1);
   }
+  setQuestions(RemoveOptionQuestion);
+}
+
+function addOption(i) {
+  var optionsOfQuestion = [...questions];
+  if (optionsOfQuestion[i].options.length < 5) {
+    optionsOfQuestion[i].options.push({optionText: "Option " + 
+    (optionsOfQuestion[i].options.length + 1)})
+  } else {
+    alert('Limit of 5 Options Reached');
+  }
+  setQuestions(optionsOfQuestion);
+}
+
+function expandCloseAll() {
+  let qs = [...questions];
+  for (let j = 0; j < qs.length; j++) {
+    qs[j].open = false;
+  }
+  setQuestions(qs);
+}
+
+function handleExpand(i) {
+  let qs = [...questions];
+  for (let j = 0; j < qs.length; j++) {
+    if (i === j) {
+      qs[i].open = true;
+    } else {
+      qs[j].open = false;
+    }
+  }
+  setQuestions(qs)
+}
+
+function copyQuestion(i) {
+  expandCloseAll();
+  let qs = [...questions];
+  var newQuestion = qs[i];
+  setQuestions([...questions, newQuestion]);
+}
+
+function deleteQuestion(i) {
+  let qs = [...questions];
+  if (questions.length > 1) {
+    qs.splice(i, 1);
+  }
+  setQuestions(qs)
+}
+
+function requiredQuestion(i) {
+  var reqQuestion = [...questions];
+  reqQuestion[i].required = !reqQuestion[i].required;
+  console.log( reqQuestion[i].required+" "+i);
+  setQuestions(reqQuestion);
+}
+
+function addQuestionField() {
+  expandCloseAll();
+  setQuestions([...questions,
+  {questionText: "Question ", questionType: "radio", 
+  options: [{optionText: "Option 1"}], open: true, required: false}]
+  );
+}
+
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+  return result;
+}
+
+function onDragEnd(result) {
+  if (!result.destination) {
+    return;
+  }
+  var itemgg = [...questions];
+  const itemF = reorder(
+    itemgg,
+    result.source.index,
+    result.destination.index
+  );
+  setQuestions(itemF);
 }
 
 const questionsUI = () => {
   return questions?.map((ques, i) => (
-    <div className="main-div">
-      <Accordion expanded={questions[i].open} className={questions[i].open ? 'add_border' : ''}>
+    <Draggable key={i} draggableId={i + 'id'} index={i}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.ref}
+          {...provided.droppableProps}
+          {...provided.draggableProps}>
+        <div>
+          <div style={{'marginBottom': '0px'}}>
+            <div style={{'width': '100%', 'marginBottom': '0px'}}>
+              <DragIndicator style={{'transform': 'rotate(-90deg)', 'color': '#DAE0E2',
+              'postion': 'relative', 'left': '300px'}} fontSize="small" />
+            </div>
+
+            <div className="main-div">
+      <Accordion expanded={questions[i].open} onChange={() => {handleExpand(i)}} className={questions[i].open ? 'add_border' : ''}>
         <AccordionSummary
         aria-controls='panel1a-content'
         id="panel1a-header"
@@ -122,6 +216,7 @@ const questionsUI = () => {
             </div>
           ): ""}
         </AccordionSummary>
+    {questions[i].open ? (
         <div className="question_boxes">
           <AccordionDetails className="add_question">
             <div className="add_question_top">
@@ -160,6 +255,25 @@ const questionsUI = () => {
                 </IconButton>
               </div>
             ))}
+
+            {ques.options.length < 5 ? (
+              <div className="add_question_body">
+                <FormControlLabel disabled control={
+                  (ques.questionType !== "text") ?
+                  <input type={ques.questionType} color="primary" 
+                    inputProps={{ 'aria-label': 'secondary checkbox'}}
+                    style={{'marginLeft': '10px', 'marginRight': '10px'}} disabled /> :
+                    <ShortText style={{'marginRight': '10px'}} />
+                } label={
+                <div>
+                  <input type="text" className="text_input" style={{'fontSize': '13px', 'width': '60px'}} placeholder="Add other" />
+                  <Button size="small" onClick={() => {addOption(i)}} style={{'textTransform': 'none', 'color': '#4285f4', 'fontSize': '13px', 'fontWeight': '600'}}>
+                  Add Option</Button>
+                </div>
+                } />
+              </div>
+            ): ""}
+            
             <div className="add_footer">
               <div className="add_question_bottom_left">
                 <Button size="small" style={{'textTransform': 'none', 'color': '#4285f4', 
@@ -170,16 +284,16 @@ const questionsUI = () => {
 
               <div className="add_question_bottom">
 
-                <IconButton aria-label="copy">
+                <IconButton aria-label="copy" onClick={()=> {copyQuestion(i)}}>
                   <FilterNone />
                 </IconButton>
 
-                
-                <IconButton aria-label="delete">
+                <IconButton aria-label="delete" onClick={()=> {deleteQuestion(i)}}>
                   <BsTrash />
                 </IconButton>
                   <span style={{'color': '#5f6368', 'fontSize': '13px'}}>Required</span>
-                  <Switch name="checkedA" color="primary" checked></Switch>
+                  <Switch name="checkedA" color="primary" 
+                    onChange={() => {requiredQuestion(i)}} ></Switch>
                 <IconButton>
                   <MoreVert />
                 </IconButton>
@@ -188,14 +302,20 @@ const questionsUI = () => {
           </AccordionDetails>
 
           <div className="question_edit">
-              <AddCircleOutline className="edit" />
+              <AddCircleOutline onClick={addQuestionField} className="edit" />
               <OndemandVideo className="edit" />
               <CropOriginal className="edit" />
               <TextFields className="edit" />
           </div>
-        </div>
+        </div>) : ""}
       </Accordion>
     </div>
+
+          </div>
+        </div>
+        </div>
+      )}
+    </Draggable>
   ))
 }
   return (
@@ -210,7 +330,21 @@ const questionsUI = () => {
               style={{ 'color': 'black' }} placeholder="Quiz Description"/>
           </div>
         </div>
-        {questionsUI()}
+
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="droppable">
+            {(provided, snapshot) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.ref}>
+
+                  {questionsUI()}
+                  {provided.placeholder}
+
+                </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
     </div>
   )
